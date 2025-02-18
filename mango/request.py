@@ -5,7 +5,7 @@ class Request:
         self.base_url = base_url
         self.session = httpx.Client()  
       
-    def post(self, endpoint, data=None):
+    def post(self, endpoint, json=None):
         if data:
             response = self.session.post(f"{self.base_url}/{endpoint}", json=data)  
             return response.json()
