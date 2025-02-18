@@ -1,7 +1,8 @@
 import httpx
+from utils import BASE_URL
 
 class Request:
-    def __init__(self, base_url):
+    def __init__(self, base_url=BASE_URL):
         self.base_url = base_url
         self.session = httpx.Client()  
       
