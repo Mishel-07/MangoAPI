@@ -14,10 +14,9 @@ class Completions:
             raise ValueError("model is required , You can see model here https://mangooapi.onrender.com/models")
         if not messages:
             raise ValueError("An error Report @XBOTSUPPORTS or https://github.com/Mishel-07/MangoAPI/issues")
-        ms = {'messages': messages}        
-        api = f"{self.chat.mango.base_url}?model={model}"  
+        ms = {'messages': messages, 'model': model}                
         try:
-            response = self.chat.mango.session.post(api, json=ms)
+            response = self.chat.mango.session.post("mango", json=ms)
             k = response.json()
             if "messages" in k and "invalid model" in k["messages"]:
                 raise ValueError("Invalid model")
