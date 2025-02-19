@@ -15,7 +15,9 @@ class Completions:
         if not messages:
             raise ValueError("messages is required")                       
         try:
-            response = self.chat.mango._do_request("mango", json={'messages': messages, 'model': model}, method="POST")           
+            response = self.chat.mango._do_request("mango", json={'messages': messages, 'model': model}, method="POST")   
+            if response.get("status") == "error":
+                raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
             if "messages" in response and "invalid model" in response["messages"]:
                 raise ValueError("Invalid model")                        
             return Choices(response)
@@ -24,9 +26,9 @@ class Completions:
             
 class Choices:
     def __init__(self, response, **kwargs):    
-        self.status = response["response"]
-        self.object = response["object"]
-        self.message= response["message"]
+        self.status = response.get("response", None)
+        self.object = response.get("object", None)
+        self.message= response.get("message", None)
         self.choices = [Response(msg) for msg in response["choices"]]
 
 class Response:
