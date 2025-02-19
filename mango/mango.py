@@ -20,7 +20,7 @@ class Mango:
         self.api_key = kwargs.get("api_key") # Now, I'll make it free, so maybe in the future, it will be required to include an API key 🥭
         self.timeout = kwargs.get("timeout")
             
-    def _do_request(self, endpoint, **kwargs):
+    def _do_request(self, endpoint: str, **kwargs):
         response = self.session.request(
             method=kwargs.get("method"),
             url=f"{self.base_url}/{endpoint}",
@@ -33,7 +33,7 @@ class Mango:
         else:
             return response.json()
             
-    def PostCompletion(self, input):
+    def PostCompletion(self, input: str):
         try:
             response = self._do_request("mango", json={"model": "gpt-3.5-turbo", messages: {"role": "user", "content": input})
             return response 
