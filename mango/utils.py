@@ -29,10 +29,10 @@ class Choices:
         self.status = response.get("response", None)
         self.object = response.get("object", None)
         self.message= response.get("message", None)
-        self.choices = [messagesort(msg) for msg in response["choices"]]
+        self.choices = [self.messagesort(msg) for msg in response["choices"]]
         
     def messagesort(self, json, **kwargs):
-        return Response(json)
+        return Response(json["messages"])
 
 class Response:
     def __init__(self, chat, **kwargs):
