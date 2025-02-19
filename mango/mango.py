@@ -27,5 +27,14 @@ class Mango:
             params=kwargs.get("params"),
         ) 
         if response.status_code != 200:
-        
-                            
+            raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
+        else:
+            return response.json()
+            
+    def PostCompletion(self, input):
+        try:
+            response = self._do_request("mango", json={"model": "gpt-3.5-turbo", messages: {"role": "user", "content": input})
+            return response 
+        except:
+            raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
+                                
