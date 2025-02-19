@@ -16,4 +16,16 @@ class Mango:
         self.base_url = base_url   
         self.session = httpx.Client()
         self.chat = Chat(self)
+        self.timeout = kwargs.get("timeout")
+            
+    def _do_request(self, endpoint, **kwargs):
+        response = self.session(
+            method=kwargs.get("method"),
+            url=f"{self.base_url}/{endpoint}",
+            timeout=self.timeout,
+            json=kwargs.get("json"),
+            params=kwargs.get("params"),
+        ) 
+        if response.status_code != 200:
+        
                             
