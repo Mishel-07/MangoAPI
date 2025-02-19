@@ -1,11 +1,12 @@
 from mango import Mango
 
-client = Mango()
-
-while True:  
-    user_input = input("You: ")
+def run_mango_client(user_input):
+    client = Mango()
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": user_input}]
     )
-    print("chatbot:", response.choices[0].message.content)
+    return response.choices[0].message.content
+
+if __name__ == "__main__":    
+    run_mango_client("hi")
