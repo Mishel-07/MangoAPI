@@ -41,6 +41,6 @@ class Messages:
         
 class Response:
     def __init__(self, chat, **kwargs):
-        self.role = content["role"]
-        self.content = Response(["content"])
+        self.role = chat["role"]
+        self.content = chat["content"]
       
