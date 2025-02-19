@@ -9,4 +9,4 @@ def run_mango_client(user_input):
     return response.choices[0].message.content
 
 if __name__ == "__main__":    
-    run_mango_client("hi")
+    print(run_mango_client("hi"))
