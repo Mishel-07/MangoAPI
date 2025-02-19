@@ -1,5 +1,3 @@
-BASE_URL = "https://mangooapi.onrender.com"
-
 class Chat:
     def __init__(self, mango, **kwargs):
         self.mango = mango
@@ -28,12 +26,19 @@ class Choices:
     def __init__(self, response, **kwargs):    
         self.status = response.get("response", None)
         self.object = response.get("object", None)
-        self.message= response.get("message", None)
+        self.message = response.get("message", None)
         self.choices = [self.messagesort(msg) for msg in response["choices"]]
         
-    def messagesort(self, json, **kwargs):
-        return Response(json["messages"])
+    def __repr__(self):
+        return str(self.__dict__)  
 
+class Messages:
+    def __init__(self, json, **kwargs):
+        self.messages = Response(json["messages"])
+        
+    def __repr__(self):
+        return str(self.__dict__)  
+        
 class Response:
     def __init__(self, chat, **kwargs):
         self.role = content["role"]
