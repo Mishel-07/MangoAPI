@@ -35,7 +35,7 @@ class Mango:
             
     def PostCompletion(self, input: str):
         try:
-            response = self._do_request("mango", json={"model": "gpt-3.5-turbo", messages: [{"role": "user", "content": input}])
+            response = self._do_request("mango", json={"model": "gpt-3.5-turbo", messages: [{"role": "user", "content": input}]})
             return response 
         except:
             raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
