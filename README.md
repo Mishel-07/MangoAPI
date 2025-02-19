@@ -8,6 +8,23 @@ Install MangoAPI using pip:
 pip install mangoapi
 ```
 
+## Usage
+
+Here is a basic example of how to use MangoAPI:
+
+```python
+from mango import Mango
+
+client = Mango()
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+
+print(response.choices[0].message.content)
+```
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
