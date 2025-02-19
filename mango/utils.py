@@ -13,18 +13,16 @@ class Completions:
         if not model:
             raise ValueError("model is required , You can see model here https://mangooapi.onrender.com/models")
         if not messages:
-            raise ValueError("An error Report @XBOTSUPPORTS or https://github.com/Mishel-07/MangoAPI/issues")
+            raise ValueError("messages is required")
         ms = {'messages': messages, 'model': model}                
         try:
-            response = self.chat.mango.session.post(f"{self.chat.mango.base_url}/mango", json=ms)
+            response = self.chat.mango._do_request("mango", json=ms, method="POST")
             k = response.json()
             if "messages" in k and "invalid model" in k["messages"]:
-                raise ValueError("Invalid model")
-            if response.status_code != 200:         
-                raise Exception(f"Error: Report  @XBOTSUPPORTS or https://github.com/Mishel-07/MangoAPI/issues")            
-            return Choices(response.json())
+                raise ValueError("Invalid model")                        
+            return Choices(response)
         except:
-            raise Exception(f"Error: Report  @XBOTSUPPORTS or https://github.com/Mishel-07/MangoAPI/issues")
+            raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
             
 class Choices:
     def __init__(self, response, **kwargs):          
