@@ -7,7 +7,7 @@ class Completions:
     def __init__(self, chat, **kwargs):
         self.chat = chat
 
-    def create(self, model=None, messages=None, **kwargs):                          
+    def create(self, model: str = None, messages: list = None, **kwargs):                          
         if not model:
             raise ValueError("model is required , You can see model here https://mangooapi.onrender.com/models")
         if not messages:
