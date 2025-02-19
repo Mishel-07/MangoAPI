@@ -16,10 +16,11 @@ class Mango:
         self.base_url = base_url   
         self.session = httpx.Client()
         self.chat = Chat(self)
+        self.api_key = kwargs.get("api_key") # Now, I'll make it free, so maybe in the future, it will be required to include an API key 🥭
         self.timeout = kwargs.get("timeout")
             
     def _do_request(self, endpoint, **kwargs):
-        response = self.session(
+        response = self.session.request(
             method=kwargs.get("method"),
             url=f"{self.base_url}/{endpoint}",
             timeout=self.timeout,
