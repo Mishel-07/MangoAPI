@@ -34,7 +34,7 @@ class Choices:
 
 class Messages:
     def __init__(self, json, **kwargs):
-        self.messages = Response(json["messages"])
+        self.messages = Response(json["message"])
         
     def __repr__(self):
         return str(self.__dict__)  
