@@ -1,5 +1,6 @@
 import httpx
-from utils import BASE_URL, Chat
+from .utils import BASE_URL
+from .chat import Chat
 
 class Mango:
     """
