@@ -26,7 +26,7 @@ class Choices:
     def __init__(self, response, **kwargs):    
         self.status = response.get("response", None)
         self.object = response.get("object", None)
-        self.message = response.get("message", None)
+        self.response = response.get("response", None)
         self.choices = [Messages(msg) for msg in response["choices"]]
         
     def __repr__(self):
@@ -34,7 +34,7 @@ class Choices:
 
 class Messages:
     def __init__(self, json, **kwargs):
-        self.messages = Response(json["message"])
+        self.message = Response(json["message"])
         
     def __repr__(self):
         return str(self.__dict__)  
