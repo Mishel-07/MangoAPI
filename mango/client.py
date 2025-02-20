@@ -1,5 +1,5 @@
 import httpx
-from .utils import BASE_URL
+
 from .chat import Chat
 
 class Mango:
@@ -7,7 +7,7 @@ class Mango:
     A class to generate content using AI models.
     """
 
-    def __init__(self, base_url=BASE_URL, **kwargs):
+    def __init__(self, base_url="https://mangooapi.onrender.com", **kwargs):
         """
         Initialize the class with the base URL of the API.
 
