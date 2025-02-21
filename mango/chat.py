@@ -16,7 +16,7 @@ class Completions:
             response = self.chat.mango._do_request("mango", json={'messages': messages, 'model': model}, method="POST")   
             if response.get("status") == "error":
                 raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
-            if "messages" in response and "invalid model" in response["messages"]:
+            if "response" in response and "invalid model" in response["messages"]:
                 raise ValueError("Invalid model")                        
             return Choices(response)
         except:
