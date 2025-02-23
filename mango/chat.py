@@ -16,7 +16,7 @@ class Completions:
             response = self.chat.mango._do_request("mango", json={'messages': messages, 'model': model}, method="POST")   
             if response.get("status") == "error":
                 raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
-            if "response" in response and "invalid model" in response["messages"]:
+            if response.get("response") == "invalid model":
                 raise ValueError("Invalid model")                        
             return Choices(response)
         except:
@@ -27,7 +27,7 @@ class Choices:
         self.status = response.get("response", None)
         self.object = response.get("object", None)
         self.response = response.get("response", None)
-        self.choices = [Messages(msg) for msg in response["choices"]]
+        self.choices = [Messages(msg) for msg in response.get("choices", [])]
         
     def __repr__(self):
         return str(self.__dict__)  
