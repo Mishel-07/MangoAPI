@@ -10,7 +10,7 @@ def chat_with_assassistant(user_input):
     conversation_memory.append({"role": "user", "content": user_input})
 
     response = client.chat.completions.create(
-        model="gpt-4o"
+        model="gpt-4o",
         messages=conversation_memory
     )    
 
