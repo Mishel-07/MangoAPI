@@ -43,4 +43,7 @@ class Response:
     def __init__(self, chat, **kwargs):
         self.role = chat["role"]
         self.content = chat["content"]
+
+    def __repr__(self):
+        return str(self.__dict__)  
       
