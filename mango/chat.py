@@ -7,13 +7,13 @@ class Completions:
     def __init__(self, chat, **kwargs):
         self.chat = chat
 
-    def create(self, model: str = None, messages: list = None, **kwargs):                          
+    def create(self, model: str = None, messages: list = None, tools: list = None, **kwargs):                          
         if not model:
             raise ValueError("model is required , You can see model here https://www.api.mangoi.in/v1/models")
         if not messages:
             raise ValueError("messages is required")                       
         try:
-            response = self.chat.mango._do_request("v1/chat/completions", json={'messages': messages, 'model': model}, method="POST")   
+            response = self.chat.mango._do_request("v1/chat/completions", json={'messages': messages, 'model': model, "tools": tools}, method="POST")   
             if response.get("status") == "error":
                 raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
             if response.get("response") == "invalid model":
