@@ -25,7 +25,7 @@ class Mango:
             timeout (float, optional): Request timeout. Defaults to 10 seconds.
         """
         self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+        self.base_url = base_url
         self.timeout = timeout
         self.session = httpx.Client()
         self.chat = Chat(self)
