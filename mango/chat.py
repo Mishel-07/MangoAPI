@@ -75,7 +75,7 @@ class Completions:
 
         try:
             response = self.chat.mango._do_request(
-                "/chat/completions",
+                "chat/completions",
                 json=payload,
                 method="POST",
                 stream=stream
