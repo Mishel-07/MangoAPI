@@ -15,7 +15,7 @@ class Mango:
     Mango API client to access moderation and chat tools.
     """
 
-    def __init__(self, api_key: str = None, base_url: str = "https://api.mangoi.in/v1/", timeout: float = 10.0):
+    def __init__(self, api_key: str = None, base_url: str = "https://api.mangoi.in/v1/", timeout: float = None):
         """
         Initialize the Mango client.
 
@@ -30,7 +30,7 @@ class Mango:
         self.session = httpx.Client()
         self.chat = Chat(self)
 
-    def _do_request(self, endpoint: str, method: str = "GET", json: dict = None, stream: bool = False):
+    def _do_request(self, endpoint: str, method: str = "GET", json: dict = None):
         """
         Internal method to make HTTP requests.
 
@@ -52,8 +52,7 @@ class Mango:
                 method=method,
                 url=url,
                 timeout=self.timeout,
-                json=json,
-                stream=stream,
+                json=json,          
             )
         except httpx.ConnectError:
             raise ConnectionMangoError()
