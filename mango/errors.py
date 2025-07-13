@@ -47,3 +47,44 @@ class ResponseMangoError(MangoError):
         )
         super().__init__(full_message)
         self.status_code = status_code
+
+
+class ModelRequiredError(MangoError):
+    """
+    Raised when model is not provided in a chat request.
+    """
+    def __init__(self, message="The 'model' field is required."):
+        super().__init__(message)
+
+
+class MessagesRequiredError(MangoError):
+    """
+    Raised when messages are missing in a chat request.
+    """
+    def __init__(self, message="The 'messages' field is required."):
+        super().__init__(message)
+
+
+class ModelNotFoundError(MangoError):
+    """
+    Raised when the specified model does not exist.
+    """
+    def __init__(self, model: str = "unknown"):
+        message = f"Model '{model}' not found."
+        super().__init__(message)
+
+
+class ServerBusyError(MangoError):
+    """
+    Raised when the Mango API server is overloaded.
+    """
+    def __init__(self, message="Server is busy. Please try again later."):
+        super().__init__(message)
+
+
+class ServerError(MangoError):
+    """
+    Raised for unknown internal server errors.
+    """
+    def __init__(self, message="Unknown internal server error"):
+        super().__init__(message)
