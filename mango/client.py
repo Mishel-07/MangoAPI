@@ -60,7 +60,7 @@ class Mango:
             raise TimeoutMangoError()
 
         if response.status_code != 200:
-            raise ResponseMangoError(response.status_code, response.text)
+            return response.text
 
         return response.json()
 
