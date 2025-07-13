@@ -1,42 +1,90 @@
 import httpx
-
 from .chat import Chat
+from .errors import (
+    APIKeyMissingError,
+    WordMissingError,
+    TimeoutMangoError,
+    ConnectionMangoError,
+    ResponseMangoError,
+)
+from .types import WordResult
+
 
 class Mango:
     """
-    A class to generate content using AI models.
+    Mango API client to access moderation and chat tools.
     """
 
-    def __init__(self, base_url="https://www.api.mangoi.in", **kwargs):
+    def __init__(self, api_key: str, base_url: str = "https://api.mangoi.in/v1", timeout: float = 10.0):
         """
-        Initialize the class with the base URL of the API.
+        Initialize the Mango client.
 
         Args:
-            base_url (str, optional): The base URL of the API. Defaults to "BASE_URL".
+            api_key (str): Your Mango API key.
+            base_url (str, optional): Base URL of the API. Defaults to Mango's v1 endpoint.
+            timeout (float, optional): Request timeout. Defaults to 10 seconds.
         """
-        self.base_url = base_url   
+        self.api_key = api_key
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
         self.session = httpx.Client()
         self.chat = Chat(self)
-        self.api_key = kwargs.get("api_key") # Now, I'll make it free, so maybe in the future, it will be required to include an API key 🥭
-        self.timeout = kwargs.get("timeout")
-            
-    def _do_request(self, endpoint: str, **kwargs):
-        response = self.session.request(
-            method=kwargs.get("method"),
-            url=f"{self.base_url}/{endpoint}",
-            timeout=self.timeout,
-            json=kwargs.get("json"),
-            params=kwargs.get("params"),
-        ) 
-        if response.status_code != 200:
-            raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
-        else:
-            return response.json()
-            
-    def PostCompletion(self, input: str, id: str):
+
+    def _do_request(self, endpoint: str, method: str = "GET", json: dict = None) -> dict:
+        """
+        Internal method to make HTTP requests.
+
+        Args:
+            endpoint (str): API endpoint with full query path.
+            method (str): HTTP method, e.g., GET or POST.
+            json (dict, optional): Optional JSON body for POST.
+
+        Returns:
+            dict: Parsed JSON response.
+
+        Raises:
+            MangoError subclasses depending on failure type.
+        """
+        url = f"{self.base_url}/{endpoint}"
+
         try:
-            response = self._do_request("mango", json={"model": id, messages: [{"role": "user", "content": input}]})
-            return response 
-        except:
-            raise Exception(f"Error: Report https://github.com/Mishel-07/MangoAPI/issues")
-                                
+            response = self.session.request(
+                method=method,
+                url=url,
+                timeout=self.timeout,
+                json=json
+            )
+        except httpx.ConnectError:
+            raise ConnectionMangoError()
+        except httpx.TimeoutException:
+            raise TimeoutMangoError()
+
+        if response.status_code != 200:
+            raise ResponseMangoError(response.status_code, response.text)
+
+        return response.json()
+
+    def words(self, word: str, accurate: int = 85) -> WordResult:
+        """
+        Analyze a word using Mango's moderation model.
+
+        Args:
+            word (str): Word to check.
+            accurate (int, optional): Accuracy level (default: 85).
+
+        Returns:
+            WordResult: Structured result object.
+
+        Example:
+            >>> client = Mango(api_key="your_api_key")
+            >>> result = client.words("shit")
+            >>> result.nosafe  # True
+        """
+        if not self.api_key:
+            raise APIKeyMissingError()
+        if not word:
+            raise WordMissingError()
+
+        endpoint = f"words/{word}/api_key={self.api_key}/accurate={accurate}"
+        data = self._do_request(endpoint)
+        return WordResult.from_json(data)
