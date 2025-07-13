@@ -78,7 +78,6 @@ class Completions:
                 "chat/completions",
                 json=payload,
                 method="POST",
-                stream=stream
             )
         except TimeoutError:
             raise TimeoutMangoError()
