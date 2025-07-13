@@ -59,10 +59,10 @@ class Mango:
         except httpx.TimeoutException:
             raise TimeoutMangoError()
 
-        if response.status_code != 200:
-            print(response.text)
+        if response.status_code != 200:            
             return response.text
-
+        if json.get("stream"):
+            return response.text
         return response.json()
 
     def words(self, word: str, accurate: int = 85) -> WordResult:
