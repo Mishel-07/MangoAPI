@@ -45,7 +45,7 @@ class Mango:
         Raises:
             MangoError subclasses depending on failure type.
         """
-        url = f"{self.base_url}/{endpoint}"
+        url = f"{self.base_url}{endpoint}"
 
         try:
             response = self.session.request(
