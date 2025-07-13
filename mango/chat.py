@@ -1,4 +1,5 @@
 import json
+import io
 
 from .errors import (
     MangoError,
@@ -109,15 +110,24 @@ class Completions:
         Internal: Parses and yields streamed completion chunks.
 
         Args:
-            raw_stream: The response stream (e.g., requests.Response with iter_lines()).
+            raw_stream: The response stream (e.g., requests.Response with iter_lines()), or a string.
             model (str): The model name used.
 
         Yields:
             StreamingChoices: One chunk at a time.
         """
-        for line in raw_stream.iter_lines():
-            if line:
-                decoded = line.decode("utf-8")
+        
+        if isinstance(raw_stream, str):
+            raw_stream = io.StringIO(raw_stream)
+
+            def iter_lines():
+                for line in raw_stream:
+                    yield line.encode("utf-8")
+            raw_stream.iter_lines = iter_lines
+
+            for line in raw_stream.iter_lines():
+                if line:
+                    decoded = line.decode("utf-8")
                 if decoded.startswith("data: "):
                     data = decoded.removeprefix("data: ").strip()
                     if data == "[DONE]":
@@ -127,7 +137,7 @@ class Completions:
                         yield StreamingChoices(parsed)
                     except json.JSONDecodeError:
                         continue
-
+        
 
 class Choices:
     """
