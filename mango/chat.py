@@ -148,6 +148,8 @@ class Choices:
         self.id = response.get("id")
         self.created = response.get("created")
         self.model = response.get("model")
+        self.index = response.get("index")
+        self.finish_reason = response.get("finish_reason")
         self.status = response.get("response")
         self.object = response.get("object")
         self.usage = Usages(response.get("usage", {}))
@@ -180,6 +182,7 @@ class Response:
     def __init__(self, chat, **kwargs):
         self.role = chat.get("role")
         self.content = chat.get("content")
+        self.tool_calls = [ToolCall(tc) for tc in chat.get("tool_calls", [])]
 
     def __repr__(self):
         return str(self.__dict__)
@@ -242,6 +245,35 @@ class StreamingResponse:
     def __init__(self, data):
         self.role = data.get("role")
         self.content = data.get("content")
+
+    def __repr__(self):
+        return str(self.__dict__)
+        
+
+class ToolFunction:
+    """
+    Represents a tool function inside a tool call.
+    """
+
+    def __init__(self, data):
+        self.name = data.get("name")
+        self.arguments = data.get("arguments")
+
+    def __repr__(self):
+        return str(self.__dict__)
+
+
+class ToolCall:
+    """
+    Represents a single tool call in the message.
+    """
+
+    def __init__(self, data):
+        self.id = data.get("id")
+        self.index = data.get("index")
+        self.finish_reason = data.get("finish_reason")
+        self.type = data.get("type")
+        self.function = ToolFunction(data.get("function", {}))
 
     def __repr__(self):
         return str(self.__dict__)
