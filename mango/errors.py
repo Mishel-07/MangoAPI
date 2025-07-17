@@ -13,6 +13,11 @@ class APIKeyMissingError(MangoError):
         super().__init__(message)
 
 
+class AuthenticationError(MangoError,):
+    def __init__(self, message: str = "unknown"):
+        super().__init__(message)
+
+
 class WordMissingError(MangoError):
     """
     Raised when no word is provided to the words() method.
@@ -74,10 +79,7 @@ class ModelNotFoundError(MangoError):
         super().__init__(message)
 
 
-class RateLimitError(MangoError):
-    """
-    Raised when the specified model does not exist.
-    """
+class RateLimitError(MangoError):    
     def __init__(self, err: str = "unknown"):        
         super().__init__(err)
 
