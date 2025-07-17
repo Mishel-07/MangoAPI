@@ -11,6 +11,8 @@ from .errors import (
     ConnectionMangoError,
     TimeoutMangoError,
     ResponseMangoError,
+    RateLimitError,
+    AuthenticationError
 )
 
 
@@ -100,10 +102,10 @@ class Completions:
                 raise ServerBusyError()
             elif code == "internal_error":             
                 raise ServerError()
-            elif code == "minute_limit_exceeded":
+            elif err.get("type") == "rate_limit_error":
                 raise RateLimitError(err.get("message"))
-            elif code == "rate_limit_exceeded":
-                raise RateLimitError(err.get("message"))
+            elif err.get("type") == "authentication_error":
+                raise AuthenticationError(err.get("message"))
             else:
                 raise ResponseMangoError(status_code=500, message=err.get("message"))
 
