@@ -74,6 +74,14 @@ class ModelNotFoundError(MangoError):
         super().__init__(message)
 
 
+class RateLimitError(MangoError):
+    """
+    Raised when the specified model does not exist.
+    """
+    def __init__(self, err: str = "unknown"):        
+        super().__init__(err)
+
+
 class ServerBusyError(MangoError):
     """
     Raised when the Mango API server is overloaded.
