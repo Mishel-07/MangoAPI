@@ -98,8 +98,12 @@ class Completions:
                 raise ModelNotFoundError(model)
             elif code == "server_busy":
                 raise ServerBusyError()
-            elif code == "internal_error":
+            elif code == "internal_error":             
                 raise ServerError()
+            elif code == "minute_limit_exceeded":
+                raise RateLimitError(err.get("message"))
+            elif code == "rate_limit_exceeded":
+                raise RateLimitError(err.get("message"))
             else:
                 raise ResponseMangoError(status_code=500, message=err.get("message"))
 
