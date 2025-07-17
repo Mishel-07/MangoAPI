@@ -1,3 +1,3 @@
 from .client import Mango
 
-__version__ = "1.0.22"
+__version__ = "1.0.23"
