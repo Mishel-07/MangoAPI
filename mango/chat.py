@@ -75,12 +75,17 @@ class Completions:
             "tools": tools,
             "stream": stream
         }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.chat.mango.api_key}"
+        }
 
         try:
             response = self.chat.mango._do_request(
                 "chat/completions",
                 json=payload,
                 method="POST",
+                headers=headers
             )
         except TimeoutError:
             raise TimeoutMangoError()
