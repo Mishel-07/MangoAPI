@@ -30,7 +30,7 @@ class Mango:
         self.session = httpx.Client()
         self.chat = Chat(self)
 
-    def _do_request(self, endpoint: str, method: str = "GET", json: dict = None):
+    def _do_request(self, endpoint: str, method: str = "GET", json: dict = None, headers : dict = None):
         """
         Internal method to make HTTP requests.
 
@@ -52,7 +52,8 @@ class Mango:
                 method=method,
                 url=url,
                 timeout=self.timeout,
-                json=json,          
+                json=json,    
+                headers=headers
             )
         except httpx.ConnectError:
             raise ConnectionMangoError()
