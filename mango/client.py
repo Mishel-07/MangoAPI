@@ -38,10 +38,7 @@ class Mango:
     def _do_request(self, endpoint: str, method: str = "GET", json: dict = None, headers: dict = None):
         """
         Internal method to make HTTP requests.
-        """
-        if not self.api_key:
-            raise APIKeyMissingError()
-
+        """        
         url = f"{self.base_url}{endpoint}"
 
         try:
