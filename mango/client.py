@@ -6,6 +6,11 @@ from .errors import (
     TimeoutMangoError,
     ConnectionMangoError,
     ResponseMangoError,
+    RateLimitError,
+    AuthenticationError,
+    ModelNotFoundError,
+    ServerBusyError,
+    ServerError,
 )
 from .types import WordResult
 
@@ -15,7 +20,7 @@ class Mango:
     Mango API client to access moderation and chat tools.
     """
 
-    def __init__(self, api_key: str = None, base_url: str = "https://api.mangoi.in/v1/", timeout: float = None):
+    def __init__(self, api_key: str = None, base_url: str = "https://api.mangoi.in/v1/", timeout: float = 10):
         """
         Initialize the Mango client.
 
@@ -30,21 +35,13 @@ class Mango:
         self.session = httpx.Client()
         self.chat = Chat(self)
 
-    def _do_request(self, endpoint: str, method: str = "GET", json: dict = None, headers : dict = None):
+    def _do_request(self, endpoint: str, method: str = "GET", json: dict = None, headers: dict = None):
         """
         Internal method to make HTTP requests.
-
-        Args:
-            endpoint (str): API endpoint with full query path.
-            method (str): HTTP method, e.g., GET or POST.
-            json (dict, optional): Optional JSON body for POST.
-
-        Returns:
-            dict: Parsed JSON response.
-
-        Raises:
-            MangoError subclasses depending on failure type.
         """
+        if not self.api_key:
+            raise APIKeyMissingError()
+
         url = f"{self.base_url}{endpoint}"
 
         try:
@@ -52,19 +49,44 @@ class Mango:
                 method=method,
                 url=url,
                 timeout=self.timeout,
-                json=json,    
+                json=json,
                 headers=headers
             )
         except httpx.ConnectError:
             raise ConnectionMangoError()
         except httpx.TimeoutException:
             raise TimeoutMangoError()
+       
+        try:
+            data = response.json()
+        except Exception:
+            raise ResponseMangoError(status_code=response.status_code, message=response.text)
 
-        if response.status_code != 200:            
+        if isinstance(data, dict) and "error" in data:
+            err = data["error"]
+            err_type = err.get("type", "").lower()
+            err_msg = err.get("message", "Unknown error from API.")
+
+            if err_type == "rate_limit_error":
+                raise RateLimitError(err_msg)
+            elif err_type == "authentication_error":
+                raise AuthenticationError(err_msg)
+            elif err.get("code") == "model_not_found":
+                raise ModelNotFoundError(err.get("param", "unknown"))
+            elif err.get("code") == "server_busy":
+                raise ServerBusyError()
+            elif err.get("code") == "internal_error":
+                raise ServerError()
+            else:
+                raise ResponseMangoError(status_code=response.status_code, message=err_msg)
+        
+        if response.status_code != 200:
+            raise ResponseMangoError(status_code=response.status_code, message=str(data))
+       
+        if json and json.get("stream"):
             return response.text
-        if json.get("stream"):
-            return response.text
-        return response.json()
+
+        return data
 
     def words(self, word: str, accurate: int = 85) -> WordResult:
         """
@@ -76,11 +98,6 @@ class Mango:
 
         Returns:
             WordResult: Structured result object.
-
-        Example:
-            >>> client = Mango(api_key="your_api_key")
-            >>> result = client.words("shit")
-            >>> result.nosafe  # True
         """
         if not self.api_key:
             raise APIKeyMissingError()
