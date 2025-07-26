@@ -55,8 +55,7 @@ class Generations:
             "model": model,
             "prompt": prompt,
             "n": n,
-            "size": size,
-            "quality": quality,          
+            "size": size            
         }
 
         headers = {
