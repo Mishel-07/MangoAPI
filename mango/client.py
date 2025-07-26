@@ -13,7 +13,7 @@ from .errors import (
     ServerError,
 )
 from .types import WordResult
-from .image import Image
+from .image import Images
 
 class Mango:
     """
@@ -34,7 +34,7 @@ class Mango:
         self.timeout = timeout
         self.session = httpx.Client()
         self.chat = Chat(self)
-        self.images = Image(self) 
+        self.images = Images(self) 
 
     def _do_request(self, endpoint: str, method: str = "GET", json: dict = None, headers: dict = None):
         """
