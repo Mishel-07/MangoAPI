@@ -3,7 +3,6 @@ import json
 from .errors import ModelRequiredError, PromptRequiredError    
 
 
-
 class Images:
     """
     Images is the main entry for image generation.
