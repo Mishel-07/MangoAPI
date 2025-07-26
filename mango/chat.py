@@ -87,33 +87,10 @@ class Completions:
                 method="POST",
                 headers=headers
             )
-        except TimeoutError:
-            raise TimeoutMangoError()
-        except ConnectionError:
-            raise ConnectionMangoError()
-        except Exception:
-            raise ServerError()
-
+        
         if stream:
             return self._stream_chunks(response, model)
-
-        if isinstance(response, dict) and "error" in response:
-            err = response["error"]
-            code = err.get("code")
-
-            if code == "model_not_found":
-                raise ModelNotFoundError(model)
-            elif code == "server_busy":
-                raise ServerBusyError()
-            elif code == "internal_error":             
-                raise ServerError()
-            elif err.get("type") == "rate_limit_error":
-                raise RateLimitError(err.get("message"))
-            elif err.get("type") == "authentication_error":
-                raise AuthenticationError(err.get("message"))
-            else:
-                raise ResponseMangoError(status_code=500, message=err.get("message"))
-
+            
         return Choices(response)
 
     def _stream_chunks(self, raw_stream, model):
