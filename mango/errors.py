@@ -20,7 +20,7 @@ class AuthenticationError(MangoError,):
 
 class WordMissingError(MangoError):
     """
-    Raised when no word is provided to the words() method.
+    Raised when no word is provided to the words() method. 
     """
     def __init__(self, message="No word provided."):
         super().__init__(message)
@@ -56,7 +56,7 @@ class ResponseMangoError(MangoError):
 
 class ModelRequiredError(MangoError):
     """
-    Raised when model is not provided in a chat request.
+    Raised when model is not provided in request.
     """
     def __init__(self, message="The 'model' field is required."):
         super().__init__(message)
@@ -64,11 +64,18 @@ class ModelRequiredError(MangoError):
 
 class MessagesRequiredError(MangoError):
     """
-    Raised when messages are missing in a chat request.
+    Raised when messages are missing in request.
     """
     def __init__(self, message="The 'messages' field is required."):
         super().__init__(message)
 
+class PromptRequiredError(MangoError):
+    """
+    Raised when prompt are missing in request.
+    """
+    def __init__(self, message="The 'prompt' field is required."):
+        super().__init__(message)
+        
 
 class ModelNotFoundError(MangoError):
     """
