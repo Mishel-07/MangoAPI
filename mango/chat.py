@@ -1,19 +1,8 @@
 import json
 import io
 
-from .errors import (
-    MangoError,
-    ModelRequiredError,
-    MessagesRequiredError,
-    ModelNotFoundError,
-    ServerBusyError,
-    ServerError,
-    ConnectionMangoError,
-    TimeoutMangoError,
-    ResponseMangoError,
-    RateLimitError,
-    AuthenticationError
-)
+from .errors import ModelRequiredError, MessagesRequiredError  
+
 
 
 class Chat:
@@ -79,14 +68,13 @@ class Completions:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.chat.mango.api_key}"
         }
-
-        try:
-            response = self.chat.mango._do_request(
-                "chat/completions",
-                json=payload,
-                method="POST",
-                headers=headers
-            )
+               
+        response = self.chat.mango._do_request(
+            "chat/completions",
+            json=payload,
+            method="POST",
+            headers=headers
+        )
         
         if stream:
             return self._stream_chunks(response, model)
