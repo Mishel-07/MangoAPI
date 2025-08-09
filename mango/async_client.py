@@ -1,6 +1,7 @@
 import httpx
 import os
 from .async_chat import AsyncChat
+from .async_client import AsyncImages
 from .errors import (
     APIKeyMissingError,
     WordMissingError,
