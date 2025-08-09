@@ -1,9 +1,7 @@
 import json
 import io
-
-from .errors import ModelRequiredError, MessagesRequiredError  
-
-
+from .errors import ModelRequiredError, MessagesRequiredError
+from .types import Choices, StreamingChoices, Messages, Response, Usages, StreamingMessages, StreamingResponse, ToolCall, ToolFunction
 
 class Chat:
     """
@@ -13,10 +11,9 @@ class Chat:
         mango (object): The Mango API client instance.
     """
 
-    def __init__(self, mango, **kwargs):
+    def __init__(self, mango):
         self.mango = mango
         self.completions = Completions(self)
-
 
 class Completions:
     """
@@ -26,29 +23,26 @@ class Completions:
         chat (Chat): Parent Chat instance.
     """
 
-    def __init__(self, chat, **kwargs):
+    def __init__(self, chat):
         self.chat = chat
 
-    def create(self, model: str = None, messages: list = None, tools: list = None, stream: bool = False, **kwargs):
+    def create(self, messages: list, model: str, temperature: float = None, max_completion_tokens: int = None, top_p: float = None, stop: str | list[str] | None = None, stream: bool = False, tools: list = None):
         """
         Creates a chat completion.
 
         Args:
+            messages (list): A list of message objects (dicts with role and content).
             model (str): The model ID to use.
-            messages (list): A list of message objects (dicts).
+            temperature (float, optional): Controls randomness (0.0 to 2.0). Defaults to None.
+            max_completion_tokens (int, optional): Maximum tokens to generate. Defaults to None.
+            top_p (float, optional): Nucleus sampling parameter. Defaults to None.
+            stop (str | list[str] | None, optional): Stop sequence(s). Defaults to None.
+            stream (bool, optional): Whether to stream the response. Defaults to False.
             tools (list, optional): Tool definitions.
-            stream (bool): Whether to stream the response.
-            **kwargs: Additional request arguments.
 
         Raises:
             ModelRequiredError: If model is not provided.
             MessagesRequiredError: If messages are not provided.
-            ModelNotFoundError: If the model is not found.
-            ServerBusyError: If the server is overloaded.
-            ServerError: For unknown internal errors.
-            ConnectionMangoError: If connection fails.
-            TimeoutMangoError: If request times out.
-            ResponseMangoError: For unexpected responses.
 
         Returns:
             Choices | Generator: Parsed response or streaming chunks.
@@ -61,24 +55,34 @@ class Completions:
         payload = {
             "model": model,
             "messages": messages,
-            "tools": tools,
-            "stream": stream
+            "stream": stream,
         }
+        if temperature is not None:
+            payload["temperature"] = temperature
+        if max_completion_tokens is not None:
+            payload["max_completion_tokens"] = max_completion_tokens
+        if top_p is not None:
+            payload["top_p"] = top_p
+        if stop is not None:
+            payload["stop"] = stop
+        if tools is not None:
+            payload["tools"] = tools
+
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.chat.mango.api_key}"
         }
-               
+
         response = self.chat.mango._do_request(
             "chat/completions",
             json=payload,
             method="POST",
             headers=headers
         )
-        
+
         if stream:
             return self._stream_chunks(response, model)
-            
+
         return Choices(response)
 
     def _stream_chunks(self, raw_stream, model):
@@ -86,13 +90,12 @@ class Completions:
         Internal: Parses and yields streamed completion chunks.
 
         Args:
-            raw_stream: The response stream (e.g., requests.Response with iter_lines()), or a string.
+            raw_stream: The response stream (e.g., string for streaming).
             model (str): The model name used.
 
         Yields:
             StreamingChoices: One chunk at a time.
         """
-        
         if isinstance(raw_stream, str):
             raw_stream = io.StringIO(raw_stream)
 
@@ -101,9 +104,9 @@ class Completions:
                     yield line.encode("utf-8")
             raw_stream.iter_lines = iter_lines
 
-            for line in raw_stream.iter_lines():
-                if line:
-                    decoded = line.decode("utf-8")
+        for line in raw_stream.iter_lines():
+            if line:
+                decoded = line.decode("utf-8")
                 if decoded.startswith("data: "):
                     data = decoded.removeprefix("data: ").strip()
                     if data == "[DONE]":
@@ -113,143 +116,3 @@ class Completions:
                         yield StreamingChoices(parsed)
                     except json.JSONDecodeError:
                         continue
-        
-
-class Choices:
-    """
-    Represents a full chat completion response (non-streamed).
-    """
-
-    def __init__(self, response, **kwargs):
-        self.id = response.get("id")
-        self.created = response.get("created")
-        self.model = response.get("model")
-        self.index = response.get("index")
-        self.finish_reason = response.get("finish_reason")
-        self.status = response.get("response")
-        self.object = response.get("object")
-        self.usage = Usages(response.get("usage", {}))
-        self.choices = [Messages(msg) for msg in response.get("choices", [])]
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
-class Messages:
-    """
-    Represents a single message in the chat response.
-    """
-
-    def __init__(self, json, **kwargs):
-        self.message = Response(json["message"])
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
-class Response:
-    """
-    Represents the actual message content.
-
-    Args:
-        chat (dict): A dict with "role" and "content".
-    """
-
-    def __init__(self, chat, **kwargs):
-        self.role = chat.get("role")
-        self.content = chat.get("content")
-        self.tool_calls = [ToolCall(tc) for tc in chat.get("tool_calls", [])]
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
-class Usages:
-    """
-    Tracks token usage.
-
-    Args:
-        usage (dict): A dict with usage stats.
-    """
-
-    def __init__(self, usage):
-        self.completion_tokens = usage.get("completion_tokens")
-        self.prompt_tokens = usage.get("prompt_tokens")
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
-class StreamingChoices:
-    """
-    Represents a streamed chat chunk.
-    """
-
-    def __init__(self, json):
-        self.id = json.get("id")
-        self.object = json.get("object")
-        self.created = json.get("created")
-        self.model = json.get("model")
-        self.choices = [StreamingMessages(msg) for msg in json.get("choices", [])]
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
-class StreamingMessages:
-    """
-    Represents a streamed delta message.
-    """
-
-    def __init__(self, msg):
-        self.delta = StreamingResponse(msg.get("delta", {}))
-        self.index = msg.get("index")
-        self.finish_reason = msg.get("finish_reason")
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
-class StreamingResponse:
-    """
-    Represents the delta in streamed response.
-
-    Args:
-        data (dict): Delta content.
-    """
-
-    def __init__(self, data):
-        self.role = data.get("role")
-        self.content = data.get("content")
-
-    def __repr__(self):
-        return str(self.__dict__)
-        
-
-class ToolFunction:
-    """
-    Represents a tool function inside a tool call.
-    """
-
-    def __init__(self, data):
-        self.name = data.get("name")
-        self.arguments = data.get("arguments")
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
-class ToolCall:
-    """
-    Represents a single tool call in the message.
-    """
-
-    def __init__(self, data):
-        self.id = data.get("id")
-        self.index = data.get("index")
-        self.finish_reason = data.get("finish_reason")
-        self.type = data.get("type")
-        self.function = ToolFunction(data.get("function", {}))
-
-    def __repr__(self):
-        return str(self.__dict__)
