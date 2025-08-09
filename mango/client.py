@@ -1,6 +1,7 @@
 import httpx
 import os
 from .chat import Chat
+from .image import Images
 from .errors import (
     APIKeyMissingError,
     WordMissingError,
