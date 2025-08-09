@@ -20,7 +20,7 @@ class AuthenticationError(MangoError,):
 
 class WordMissingError(MangoError):
     """
-    Raised when no word is provided to the words() method. 
+    Raised when the World is not provided.
     """
     def __init__(self, message="No word provided."):
         super().__init__(message)
