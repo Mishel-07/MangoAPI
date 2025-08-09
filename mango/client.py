@@ -1,4 +1,5 @@
 import httpx
+import os
 from .chat import Chat
 from .errors import (
     APIKeyMissingError,
@@ -13,7 +14,6 @@ from .errors import (
     ServerError,
 )
 from .types import WordResult
-from .image import Images
 
 class Mango:
     """
@@ -25,21 +25,41 @@ class Mango:
         Initialize the Mango client.
 
         Args:
-            api_key (str): Your Mango API key.
+            api_key (str, optional): Your Mango API key. Defaults to os.getenv("MANGO_API_KEY").
             base_url (str, optional): Base URL of the API. Defaults to Mango's v1 endpoint.
             timeout (float, optional): Request timeout. Defaults to 10 seconds.
         """
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("MANGO_API_KEY")
         self.base_url = base_url
         self.timeout = timeout
         self.session = httpx.Client()
         self.chat = Chat(self)
-        self.images = Images(self) 
+        self.images = Images(self)
+
+    def __enter__(self):
+        """Enter the context manager."""
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Exit the context manager, closing the HTTP session."""
+        self.session.close()
 
     def _do_request(self, endpoint: str, method: str = "GET", json: dict = None, headers: dict = None):
         """
         Internal method to make HTTP requests.
-        """        
+
+        Args:
+            endpoint (str): API endpoint to call.
+            method (str): HTTP method (e.g., GET, POST).
+            json (dict, optional): JSON payload for the request.
+            headers (dict, optional): Additional headers.
+
+        Returns:
+            Response data or raises an error based on the API response.
+        """
+        if not self.api_key:
+            raise APIKeyMissingError()
+
         url = f"{self.base_url}/{endpoint}"
 
         try:
@@ -54,7 +74,7 @@ class Mango:
             raise ConnectionMangoError()
         except httpx.TimeoutException:
             raise TimeoutMangoError()
-       
+
         try:
             data = response.json()
         except Exception:
@@ -77,10 +97,10 @@ class Mango:
                 raise ServerError()
             else:
                 raise ResponseMangoError(status_code=response.status_code, message=err_msg)
-        
+
         if response.status_code != 200:
             raise ResponseMangoError(status_code=response.status_code, message=str(data))
-       
+
         if json and json.get("stream"):
             return response.text
 
@@ -97,8 +117,6 @@ class Mango:
         Returns:
             WordResult: Structured result object.
         """
-        if not self.api_key:
-            raise APIKeyMissingError()
         if not word:
             raise WordMissingError()
 
